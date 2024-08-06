@@ -7,7 +7,7 @@ inputs:
   artifact-download-path:
     description: 'Download path for the .nupkg package'
     required: false
-    default: ${{ github.workspace }}\optimizely-dxp-deploy\
+    default: optimizely-dxp-deploy
   artifact-file-name:
     description: '.nupkg package full name'
     required: true
@@ -36,6 +36,9 @@ runs:
       with:
         name: ${{ inputs.artifact-name }}
         path: ${{ inputs.artifact-download-path }}
+    - name: List contents of publish directory after archiving
+      run: |
+        ls "${{ github.workspace }}\${{ inputs.artifact-download-path }}"
     - name: Install modules
       run: |
         Write-Host "`n`nStarting Installation..."
