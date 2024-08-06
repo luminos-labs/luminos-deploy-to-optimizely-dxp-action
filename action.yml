@@ -1,0 +1,83 @@
+name: 'Deploy to Optimizely DXP'
+description: 'Deploy site to Optimizely Digital Experience Platform DXP via PowerShell'
+inputs:
+  artifact-name: 
+    description: 'The .nupkg package full name'
+    required: true
+  artifact-download-path:
+    description: 'Download path for the .nupkg package'
+    required: false
+    default: ${{ github.workspace }}\optimizely-dxp-deploy\
+  optimizely-project-id:
+    description: 'Optimizely Project Id'
+    required: true
+  optimizely-api-key:
+    description: 'Optimizely API Key'
+    required: true
+  optimizely-api-secret:
+    description: 'Optimizely API Secret'
+    required: true
+  optimizely-environment:
+    description: 'Environment to deploy'
+    required: false
+    default: 'Integration'
+outputs:
+  operation-id:
+    description: ''
+    value: ${{ step.abc.outputs.abc }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Download artifact from build job
+    uses: actions/download-artifact@v4
+    with:
+      name: ${{ inputs.artifact-name }}
+      path: ${{ inputs.artifact-download-path }}
+    - name: Install modules
+      run: |
+        Write-Host "`n`nStarting Installation..."
+        $packageProvider = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
+        if ($packageProvider)
+        {
+          Write-Output "NuGet package provider $($packageProvider.Version) is already installed"
+        }
+        else
+        {
+          Write-Output "Attempting to install NuGet package provider"
+          Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -ForceBootstrap -Confirm:$false -Verbose
+        }     
+        Write-Host "`n`nInstall PowerShellGet..."
+        Install-Module -Name PowerShellGet -Force -Verbose -Scope CurrentUser
+        Write-Host "`n`nUpdate PowerShellGet..."
+        Update-Module -Name PowerShellGet -Scope CurrentUser
+        Write-Host "`n`nInstall EpiCloud..."
+        Install-Module -Name EpiCloud -Verbose -AcceptLicense -Scope CurrentUser -Force 
+        Write-Host "`n`nInstall Azure Storage..."
+        Install-Module -Name Azure.Storage -Scope CurrentUser -Repository PSGallery -Force -AllowClobber -Verbose 
+    - name: Upload .nupkg to DXP
+      run: |
+        $packageName = "${{ inputs.artifact-download-path }}\${{ inputs.artifact-name }}"  
+        Write-Host "`n`nImport Azure Storage and EpiCloud..."
+        Import-Module Azure.Storage 
+        Import-Module EpiCloud
+        # Connect EpiCloud using credentials from portal
+        Connect-EpiCloud -ProjectId "${{ inputs.optimizely-project-id }}" -ClientKey "${{ inputs.optimizely-api-key }}" -ClientSecret "${{ inputs.optimizely-api-secret }}"
+        # Upload .NET Core to blob storage
+        $sasUrl = Get-EpiDeploymentPackageLocation
+        Add-EpiDeploymentPackage -SasUrl $sasUrl -Path $packageName -Verbose
+    - name: Deploy .nupkg to Target Environment
+      run: |
+        Write-Host "`n`nImport Azure Storage and EpiCloud..."
+        $packageName = "${{ inputs.artifact-download-path }}\${{ inputs.artifact-name }}" 
+        Import-Module Azure.Storage 
+        Import-Module EpiCloud
+        # Connect EpiCloud using credentials from portal
+        Connect-EpiCloud -ProjectId "${{ inputs.optimizely-project-id }}" -ClientKey "${{ inputs.optimizely-api-key }}" -ClientSecret "${{ inputs.optimizely-api-secret }}"
+        # Deploy package to environment. This will first build a docker image out of the package and then deploy it to the target environment.
+        # !!! DIRECT_DEPLOY MUST BE $true FOR INTEGRATION ENVIRONMENT AND $false FOR PREPRODUCTION/PRODUCTION
+        $directDeployInformation = Start-EpiDeployment -DeploymentPackage $packageName -TargetEnvironment "${{ inputs.optimizely-environment }}" -DirectDeploy -Wait -Verbose
+        Write-Host "Direct deploy object: "
+        Write-Host $directDeployInformation
+        Write-Host "Direct deploy id: "
+        Write-Host $directDeployInformation.id
+        Write-Output "operation-id=$($directDeployInformation.id)" >> $Env:GITHUB_OUTPUT
