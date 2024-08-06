@@ -32,10 +32,10 @@ runs:
   using: 'composite'
   steps:
     - name: Download artifact from build job
-    uses: actions/download-artifact@v4
-    with:
-      name: ${{ inputs.artifact-name }}
-      path: ${{ inputs.artifact-download-path }}
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.artifact-download-path }}
     - name: Install modules
       run: |
         Write-Host "`n`nStarting Installation..."
