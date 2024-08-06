@@ -26,8 +26,8 @@ inputs:
     default: 'Integration'
 outputs:
   operation-id:
-    description: ''
-    value: ${{ step.abc.outputs.abc }}
+    description: 'Deploy Id'
+    value: ${{ step.deploy-to-environment.outputs.operation-id }}
 runs:
   using: 'composite'
   steps:
@@ -59,7 +59,7 @@ runs:
         Install-Module -Name Azure.Storage -Scope CurrentUser -Repository PSGallery -Force -AllowClobber -Verbose 
     - name: Upload .nupkg to DXP
       run: |
-        $packageName = "${{ inputs.artifact-download-path }}\${{ inputs.artifact-name }}"  
+        $packageName = "${{ inputs.artifact-download-path }}\${{ inputs.artifact-file-name }}"  
         Write-Host "`n`nImport Azure Storage and EpiCloud..."
         Import-Module Azure.Storage 
         Import-Module EpiCloud
@@ -69,9 +69,10 @@ runs:
         $sasUrl = Get-EpiDeploymentPackageLocation
         Add-EpiDeploymentPackage -SasUrl $sasUrl -Path $packageName -Verbose
     - name: Deploy .nupkg to Target Environment
+      id: deploy-to-environment
       run: |
         Write-Host "`n`nImport Azure Storage and EpiCloud..."
-        $packageName = "${{ inputs.artifact-download-path }}\${{ inputs.artifact-name }}" 
+        $packageName = "${{ inputs.artifact-download-path }}\${{ inputs.artifact-file-name }}" 
         Import-Module Azure.Storage 
         Import-Module EpiCloud
         # Connect EpiCloud using credentials from portal
