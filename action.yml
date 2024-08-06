@@ -64,7 +64,7 @@ runs:
       shell: pwsh
     - name: Upload .nupkg to DXP
       run: |
-        $packageName = "${{ inputs.artifact-download-path }}\${{ inputs.artifact-file-name }}"  
+        $packageName = "${{ github.workspace }}\${{ inputs.artifact-download-path }}\${{ inputs.artifact-file-name }}"  
         Write-Host "`n`nImport Azure Storage and EpiCloud..."
         Import-Module Azure.Storage 
         Import-Module EpiCloud
@@ -78,7 +78,7 @@ runs:
       id: deploy-to-environment
       run: |
         Write-Host "`n`nImport Azure Storage and EpiCloud..."
-        $packageName = "${{ inputs.artifact-download-path }}\${{ inputs.artifact-file-name }}" 
+        $packageName = "${{ github.workspace }}\${{ inputs.artifact-download-path }}\${{ inputs.artifact-file-name }}" 
         Import-Module Azure.Storage 
         Import-Module EpiCloud
         # Connect EpiCloud using credentials from portal
