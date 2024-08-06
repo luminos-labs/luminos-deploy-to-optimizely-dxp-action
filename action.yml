@@ -39,6 +39,7 @@ runs:
     - name: List contents of publish directory after archiving
       run: |
         ls "${{ github.workspace }}\${{ inputs.artifact-download-path }}"
+      shell: pwsh
     - name: Install modules
       run: |
         Write-Host "`n`nStarting Installation..."
