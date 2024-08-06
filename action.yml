@@ -27,7 +27,7 @@ inputs:
 outputs:
   operation-id:
     description: 'Deploy Id'
-    value: ${{ step.deploy-to-environment.outputs.operation-id }}
+    value: ${{ steps.deploy-to-environment.outputs.operation-id }}
 runs:
   using: 'composite'
   steps:
