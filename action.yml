@@ -56,7 +56,8 @@ runs:
         Write-Host "`n`nInstall EpiCloud..."
         Install-Module -Name EpiCloud -Verbose -AcceptLicense -Scope CurrentUser -Force 
         Write-Host "`n`nInstall Azure Storage..."
-        Install-Module -Name Azure.Storage -Scope CurrentUser -Repository PSGallery -Force -AllowClobber -Verbose 
+        Install-Module -Name Azure.Storage -Scope CurrentUser -Repository PSGallery -Force -AllowClobber -Verbose
+      shell: pwsh
     - name: Upload .nupkg to DXP
       run: |
         $packageName = "${{ inputs.artifact-download-path }}\${{ inputs.artifact-file-name }}"  
@@ -68,6 +69,7 @@ runs:
         # Upload .NET Core to blob storage
         $sasUrl = Get-EpiDeploymentPackageLocation
         Add-EpiDeploymentPackage -SasUrl $sasUrl -Path $packageName -Verbose
+      shell: pwsh
     - name: Deploy .nupkg to Target Environment
       id: deploy-to-environment
       run: |
@@ -85,3 +87,4 @@ runs:
         Write-Host "Direct deploy id: "
         Write-Host $directDeployInformation.id
         Write-Output "operation-id=$($directDeployInformation.id)" >> $Env:GITHUB_OUTPUT
+      shell: pwsh
