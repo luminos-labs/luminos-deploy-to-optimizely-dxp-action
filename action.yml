@@ -2,12 +2,15 @@ name: 'Deploy to Optimizely DXP'
 description: 'Deploy site to Optimizely Digital Experience Platform DXP via PowerShell'
 inputs:
   artifact-name: 
-    description: 'The .nupkg package full name'
+    description: 'The uploaded artifact name.'
     required: true
   artifact-download-path:
     description: 'Download path for the .nupkg package'
     required: false
     default: ${{ github.workspace }}\optimizely-dxp-deploy\
+  artifact-file-name:
+    description: '.nupkg package full name'
+    required: true
   optimizely-project-id:
     description: 'Optimizely Project Id'
     required: true
