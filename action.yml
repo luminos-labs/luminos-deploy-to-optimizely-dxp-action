@@ -9,7 +9,7 @@ inputs:
     required: false
     default: optimizely-dxp-deploy
   artifact-file-name:
-    description: '.nupkg package full name'
+    description: 'Naming accepted by opti <app name>.<package type>.app.<version>.nupkg'
     required: true
   optimizely-project-id:
     description: 'Optimizely Project Id'
@@ -78,7 +78,7 @@ runs:
       id: deploy-to-environment
       run: |
         Write-Host "`n`nImport Azure Storage and EpiCloud..."
-        $packageName = "${{ github.workspace }}\${{ inputs.artifact-download-path }}\${{ inputs.artifact-file-name }}" 
+        $packageName = "${{ inputs.artifact-file-name }}" 
         Import-Module Azure.Storage 
         Import-Module EpiCloud
         # Connect EpiCloud using credentials from portal
