@@ -54,7 +54,7 @@ runs:
           Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -ForceBootstrap -Confirm:$false -Verbose
         }     
         Write-Host "`n`nInstall PowerShellGet..."
-        Install-Module -Name PowerShellGet -Force -Verbose -Scope CurrentUser
+        Install-Module -Name PowerShellGet -AllowClobber -Force -Verbose -Scope CurrentUser
         Write-Host "`n`nUpdate PowerShellGet..."
         Update-Module -Name PowerShellGet -Scope CurrentUser
         Write-Host "`n`nInstall EpiCloud..."
