@@ -56,7 +56,7 @@ runs:
         Write-Host "`n`nInstall PowerShellGet..."
         Install-Module -Name PowerShellGet -AllowClobber -Force -Verbose -Scope CurrentUser
         Write-Host "`n`nUpdate PowerShellGet..."
-        Update-Module -Name PowerShellGet -Scope CurrentUser
+        Update-Module -Name PowerShellGet
         Write-Host "`n`nInstall EpiCloud..."
         Install-Module -Name EpiCloud -Verbose -AcceptLicense -Scope CurrentUser -Force 
         Write-Host "`n`nInstall Azure Storage..."
