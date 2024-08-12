@@ -31,7 +31,7 @@ inputs:
 outputs:
   operation-id:
     description: 'Deploy Id'
-    value: ${{ steps.deploy-to-environment.outputs.operation-id }}
+    value: ${{ steps.deploy-to-environment.outputs.operation-id }} || ${{ steps.direct-deploy-to-environment.outputs.operation-id }}
 runs:
   using: 'composite'
   steps:
@@ -76,7 +76,7 @@ runs:
       shell: pwsh
     - name: Direct Deploy .nupkg to Target Environment
       if: ${{ inputs.optimizely-direct-deploy == 'true' }}
-      id: deploy-to-environment
+      id: direct-deploy-to-environment
       run: |
         Write-Host "`n`nImport Azure Storage and EpiCloud..."
         $packageName = "${{ inputs.artifact-file-name }}" 
