@@ -24,6 +24,10 @@ inputs:
     description: 'Environment to deploy'
     required: false
     default: 'Integration'
+  optimizely-direct-deploy:
+    description: 'Enable direct deploy in DXP'
+    required: false
+    default: 'true'
 outputs:
   operation-id:
     description: 'Deploy Id'
@@ -70,7 +74,8 @@ runs:
         $sasUrl = Get-EpiDeploymentPackageLocation
         Add-EpiDeploymentPackage -SasUrl $sasUrl -Path $packageName -Verbose
       shell: pwsh
-    - name: Deploy .nupkg to Target Environment
+    - name: Direct Deploy .nupkg to Target Environment
+      if: ${{ inputs.optimizely-direct-deploy == 'true' }}
       id: deploy-to-environment
       run: |
         Write-Host "`n`nImport Azure Storage and EpiCloud..."
@@ -87,4 +92,22 @@ runs:
         Write-Host "Direct deploy id: "
         Write-Host $directDeployInformation.id
         Write-Output "operation-id=$($directDeployInformation.id)" >> $Env:GITHUB_OUTPUT
+      shell: pwsh
+    - name: Deploy .nupkg to Target Environment
+      if: ${{ inputs.optimizely-direct-deploy != 'true' }}
+      id: deploy-to-environment
+      run: |
+        Write-Host "`n`nImport Azure Storage and EpiCloud..."
+        $packageName = "${{ inputs.artifact-file-name }}" 
+        Import-Module Azure.Storage 
+        Import-Module EpiCloud
+        # Connect EpiCloud using credentials from portal
+        Connect-EpiCloud -ProjectId "${{ inputs.optimizely-project-id }}" -ClientKey "${{ inputs.optimizely-api-key }}" -ClientSecret "${{ inputs.optimizely-api-secret }}"
+        # Deploy package to environment. This will first build a docker image out of the package and then deploy it to the target environment.
+        $deployInformation = Start-EpiDeployment -DeploymentPackage $packageName -TargetEnvironment "${{ inputs.optimizely-environment }}" -Wait -Verbose
+        Write-Host "Direct deploy object: "
+        Write-Host $deployInformation
+        Write-Host "Direct deploy id: "
+        Write-Host $deployInformation.id
+        Write-Output "operation-id=$($deployInformation.id)" >> $Env:GITHUB_OUTPUT
       shell: pwsh
