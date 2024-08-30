@@ -1,5 +1,11 @@
 name: 'Deploy to Optimizely DXP'
 description: 'Deploy site to Optimizely Digital Experience Platform DXP via PowerShell'
+author: 'LuminosLabs'
+
+branding:
+  icon: "upload-cloud"
+  color: "purple"
+
 inputs:
   artifact-name: 
     description: 'The uploaded artifact name.'
