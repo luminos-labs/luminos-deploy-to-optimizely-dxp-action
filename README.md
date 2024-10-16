@@ -10,7 +10,7 @@ To use this action, simply add the following step to your GitHub Actions workflo
 
 ```yaml
 - name: Deploy to Optimizely DXP
-    uses: luminoslabs/deploy-to-optimizely-dxp-action@v1
+    uses: luminoslabs/luminos-deploy-to-optimizely-dxp-action@v1
     with:
         # The uploaded artifact name. 
         artifact-name: $YOUR_ARTIFACT_NAME
@@ -64,7 +64,7 @@ jobs:
                 path: ${{ github.workspace }}\publish\appname.cms.app.1.${{ env.run_number }}.nupkg
 
             - name: Deploy to Optimizely DXP
-                uses: luminoslabs/deploy-to-optimizely-dxp-action@v1
+                uses: luminoslabs/luminos-deploy-to-optimizely-dxp-action@v1
                 with:
                     artifact-name: app-artifact
                     artifact-file-name: appname.cms.app.1.${{ env.run_number }}.nupkg
