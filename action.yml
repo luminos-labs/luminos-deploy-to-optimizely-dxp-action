@@ -122,7 +122,7 @@ runs:
         Write-Output "operation-id=$($deployInformation.id)" >> $Env:GITHUB_OUTPUT
       shell: pwsh
 
-      - name: Autocomplete Deployment
+    - name: Autocomplete Deployment
       if: ${{ inputs.optimizely-autocomplete-deploy == 'true' }}
       id: autocomplete-deploy
       run: |
