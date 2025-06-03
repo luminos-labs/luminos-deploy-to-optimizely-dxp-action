@@ -34,6 +34,10 @@ inputs:
     description: 'Enable direct deploy in DXP'
     required: false
     default: 'true'
+  optimizely-autocomplete-deploy:
+    description: 'Autocomplete deployment in DXP'
+    required: false
+    default: 'false'
 outputs:
   operation-id:
     description: 'Deploy Id'
@@ -116,4 +120,87 @@ runs:
         Write-Host "Direct deploy id: "
         Write-Host $deployInformation.id
         Write-Output "operation-id=$($deployInformation.id)" >> $Env:GITHUB_OUTPUT
+      shell: pwsh
+
+      - name: Autocomplete Deployment
+      if: ${{ inputs.optimizely-autocomplete-deploy == 'true' }}
+      id: autocomplete-deploy
+      run: |
+          # Poll deployment status until completion or failure
+          $maxAttempts = 180 # 1.5 hours total (180 * 30 seconds = 5400 seconds = 90 minutes)
+          $attempts = 0
+          $isComplete = $false
+          $deploymentId = "${{ steps.deploy-to-environment.outputs.operation-id }}"
+          if (-not $deploymentId) {
+            $deploymentId = "${{ steps.direct-deploy-to-environment.outputs.operation-id }}"
+          }
+
+          Write-Host "`n`nPolling deployment status until complete..."
+          
+          do {
+            $attempts++
+            $deploymentStatus = Get-EpiDeployment -Id $deploymentId
+            $percentComplete = $deploymentStatus.percentComplete
+            
+            Write-Host "Attempt $attempts - Deployment status: $($deploymentStatus.status), Percent complete: $percentComplete%"
+            
+            # Check if deployment is complete
+            if ($percentComplete -eq 100) {
+                $isComplete = $true
+                Write-Host "Deployment is complete!"
+            }
+            # Check for failures
+            elseif ($deploymentStatus.status -eq "Failed") {
+                Write-Error "Deployment failed with status: $($deploymentStatus.status)"
+                Write-Error "Deployment errors: $($deploymentStatus.deploymentErrors | ConvertTo-Json -Depth 3)"
+                exit 1
+            }
+            # Check timeout
+            elseif ($attempts -ge $maxAttempts) {
+                Write-Error "Deployment timed out after $attempts attempts"
+                exit 1
+            }
+            # Wait before next attempt
+            else {
+                Write-Host "Waiting 30 seconds before next check..."
+                Start-Sleep -Seconds 30
+            }
+          } while (-not $isComplete)
+          
+          # Complete the deployment after successful completion
+          Write-Host "Waiting 30 seconds before completing deployment..."
+          Start-Sleep -Seconds 30
+          Write-Host "`n`nFinalizing deployment..."
+          Complete-EpiDeployment -Id $deploymentId
+          $attempts = 0
+          $isComplete = $false
+          do {
+            $attempts++
+            $deploymentStatus = Get-EpiDeployment -Id $deploymentId
+            
+            Write-Host "Attempt $attempts - Deployment status: $($deploymentStatus.status), Percent complete: $($deploymentStatus.percentComplete)% "
+            
+            # Check if deployment is complete
+            if ($deploymentStatus.status -eq "Succeeded") {
+                $isComplete = $true
+                Write-Host "Deployment is complete!"
+            }
+            # Check for failures
+            elseif ($deploymentStatus.status -eq "Failed") {
+                Write-Error "Deployment failed with status: $($deploymentStatus.status)"
+                Write-Error "Deployment errors: $($deploymentStatus.deploymentErrors | ConvertTo-Json -Depth 3)"
+                exit 1
+            }
+            # Check timeout
+            elseif ($attempts -ge $maxAttempts) {
+                Write-Error "Deployment timed out after $attempts attempts"
+                exit 1
+            }
+            # Wait before next attempt
+            else {
+                Write-Host "Waiting 30 seconds before next check..."
+                Start-Sleep -Seconds 30
+            }
+          } while (-not $isComplete)
+          Write-Host "Deployment successfully completed!"
       shell: pwsh
