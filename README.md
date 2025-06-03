@@ -10,7 +10,7 @@ To use this action, simply add the following step to your GitHub Actions workflo
 
 ```yaml
 - name: Deploy to Optimizely DXP
-  uses: luminoslabs/deploy-to-optimizely-dxp-action@v1
+    uses: luminoslabs/luminos-deploy-to-optimizely-dxp-action@v1
   with:
     # The uploaded artifact name. 
     artifact-name: $YOUR_ARTIFACT_NAME
@@ -69,17 +69,18 @@ jobs:
           name: app-artifact
           path: ${{ github.workspace }}\publish\appname.cms.app.1.${{ env.run_number }}.nupkg
 
-      - name: Deploy to Optimizely DXP
-        uses: luminoslabs/deploy-to-optimizely-dxp-action@v1
-        with:
-          artifact-name: app-artifact
-          artifact-file-name: appname.cms.app.1.${{ env.run_number }}.nupkg
-          optimizely-project-id: ${{ secrets.OPTI_PROJECT_ID }}
-          optimizely-api-key: ${{ secrets.OPTI_API_KEY }}
-          optimizely-api-secret: ${{ secrets.OPTI_API_SECRET }}
-          optimizely-environment: ${{ secrets.OPTI_TARGET_ENVIRONMENT }}
-          optimizely-direct-deploy: 'false'
-          optimizely-autocomplete-deploy: 'true'
+            - name: Deploy to Optimizely DXP
+                uses: luminoslabs/luminos-deploy-to-optimizely-dxp-action@v1
+                with:
+                    artifact-name: app-artifact
+                    artifact-file-name: appname.cms.app.1.${{ env.run_number }}.nupkg
+                    optimizely-project-id: ${{ secrets.OPTI_PROJECT_ID }}
+                    optimizely-api-key: ${{ secrets.OPTI_API_KEY }}
+                    optimizely-api-secret: ${{ secrets.OPTI_API_SECRET }}
+                    optimizely-environment: ${{ secrets.OPTI_TARGET_ENVIRONMENT }}
+                    optimizely-direct-deploy: 'false'
+                    optimizely-autocomplete-deploy: 'true'
+
 ```
 
 ## Documentation
