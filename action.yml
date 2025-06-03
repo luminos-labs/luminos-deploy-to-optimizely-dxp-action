@@ -126,14 +126,18 @@ runs:
       if: ${{ inputs.optimizely-autocomplete-deploy == 'true' && inputs.optimizely-direct-deploy == 'false' }}
       id: autocomplete-deploy
       run: |
+          Write-Host "`n`nImport Azure Storage and EpiCloud..."
+          $packageName = "${{ inputs.artifact-file-name }}" 
+          Import-Module Azure.Storage 
+          Import-Module EpiCloud
+          # Connect EpiCloud using credentials from portal
+          Connect-EpiCloud -ProjectId "${{ inputs.optimizely-project-id }}" -ClientKey "${{ inputs.optimizely-api-key }}" -ClientSecret "${{ inputs.optimizely-api-secret }}"
+
           # Poll deployment status until completion or failure
           $maxAttempts = 180 # 1.5 hours total (180 * 30 seconds = 5400 seconds = 90 minutes)
           $attempts = 0
           $isComplete = $false
           $deploymentId = "${{ steps.deploy-to-environment.outputs.operation-id }}"
-          if (-not $deploymentId) {
-            $deploymentId = "${{ steps.direct-deploy-to-environment.outputs.operation-id }}"
-          }
 
           Write-Host "`n`nPolling deployment status until complete..."
           
